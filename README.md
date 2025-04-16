@@ -20,8 +20,8 @@ composer require emmanpbarrameda/filament-take-picture-field
 ## Requirements
 
 - PHP: ^8.1
-- Filament/Forms: ^3.0
-- A device with camera access
+- Filament: ^3.0
+- A device with camera access (desktop or mobile)
 
 ## Usage
 
@@ -93,6 +93,6 @@ MIT
   <img alt='/e/' src='https://img.shields.io/badge/MADE_BY - EMMAN_P_BARRAMEDA-100000?style=for-the-badge&logo=/e/&logoColor=1877F2&labelColor=FFFFFF&color=1877F2'/>
   
   <!-- made with love -->
-  <img alt='' src='https://img.shields.io/badge/MADE_- WITH LOVE-100000?style=for-the-badge&logo=&logoColor=white&labelColor=EF4041&color=C1282D'/>
+  <img alt='' src='https://img.shields.io/badge/MAKE_IT_WITH_LOVE_FROM_PH-❤️-100000?style=for-the-badge&labelColor=EF4041&color=C1282D'/>
   
 </p>
