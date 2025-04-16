@@ -55,7 +55,7 @@ TakePicture::make('camera_test')
 | `showCameraSelector(bool $showSelector)` | Enable or disable camera selection option for devices with multiple cameras (default: 'true') |
 | `aspect(string $aspect)` | Set the aspect ratio for the captured image (e.g., '16:9', '4:3', '1:1') |
 | `imageQuality(int $quality)` | Set the JPEG quality of the captured image (0-100) |
-| `shouldDeleteOnEdit(bool $shouldDelete)` | Whether to delete the previous file when editing (default: 'true') |
+| `shouldDeleteOnEdit(bool $shouldDelete)` | Whether to delete the previous file when editing (default: 'false') |
 
 ## Screenshots
 
