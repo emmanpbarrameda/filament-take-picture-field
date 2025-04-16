@@ -1,6 +1,6 @@
 # Filament Take Picture Field v1
 
-A custom Filament 3 form component that allows users to capture photos directly from their device camera and upload them to your application's storage.
+A custom Filament 3 form component to capture photos from your device camera.
 
 ## Features
 
