@@ -558,7 +558,7 @@
                         </template>
                         
                         <!-- ACTION BUTTONS -->
-                        <div class="flex justify-end space-x-3">
+                        <div class="flex justify-end gap-2">
                             <button
                                 type="button"
                                 @click="closeModal()"
