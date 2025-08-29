@@ -1,11 +1,11 @@
 # Filament Take Picture Field v1
 
-A custom Filament 3 form component to capture photos from your device camera.
+A custom Filament 4 form component to capture photos from your device camera.
 
 ## Features
 
 - Take photos directly from the user's device camera
-- Seamless integration with Filament 3 forms
+- Seamless integration with Filament 4 forms
 - Configurable storage options (disk, directory, visibility)
 - Camera selector for devices with multiple cameras
 - Adjustable aspect ratio and image quality
@@ -19,8 +19,8 @@ composer require emmanpbarrameda/filament-take-picture-field
 
 ## Requirements
 
-- PHP: ^8.1
-- Filament: ^3.0
+- PHP: ^8.2
+- Filament: ^4.0
 - A device with camera access (desktop or mobile)
 
 ## Usage
