@@ -19,6 +19,7 @@ composer require emmanpbarrameda/filament-take-picture-field
 
 ## Requirements
 
+- Laravel 11^
 - PHP: 8.1^
 - Filament: v3^ and v4^
 - A device with camera access (desktop or mobile)
