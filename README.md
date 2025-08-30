@@ -20,7 +20,7 @@ composer require emmanpbarrameda/filament-take-picture-field
 ## Requirements
 
 - PHP: ^8.2
-- Filament: ^4.0
+- Filament: v3^ and v4^
 - A device with camera access (desktop or mobile)
 
 ## Usage
