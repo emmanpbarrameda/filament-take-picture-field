@@ -19,7 +19,7 @@ composer require emmanpbarrameda/filament-take-picture-field
 
 ## Requirements
 
-- PHP: ^8.2
+- PHP: 8.1^
 - Filament: v3^ and v4^
 - A device with camera access (desktop or mobile)
 
@@ -56,6 +56,48 @@ TakePicture::make('camera_test')
 | `aspect(string $aspect)` | Set the aspect ratio for the captured image (e.g., '16:9', '4:3', '1:1') |
 | `imageQuality(int $quality)` | Set the JPEG quality of the captured image (0-100) |
 | `shouldDeleteOnEdit(bool $shouldDelete)` | Whether to delete the previous file when editing (default: 'false') |
+
+## ❗ IMPORTANT NOTICE: For Local development
+
+The browser's Camera API only works on **secure origins** (HTTPS). Many browsers treat `https://localhost` as secure, but **plain** `http://` over an IP (e.g., `http://127.0.0.1:8000`) is considered insecure and the camera will be blocked. If it isn't working for you on `localhost`, switch to HTTPS or use the temporary Chrome test flags below.
+
+### Recommended (safer) options
+
+### Temporary Chrome workaround (for testing only)
+
+If you must test over plain HTTP on a LAN IP, you can launch Chrome to *temporarily* treat that origin as secure. **Do not use this for normal browsing.** Use a separate profile and close all Chrome windows first.
+
+Replace `http://127.0.0.1:8000` with your dev server's URL.
+
+**Windows:**
+
+```cmd
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="C:\chrome-dev-test" --unsafely-treat-insecure-origin-as-secure=http://127.0.0.1:8000 --disable-web-security
+```
+
+**macOS:**
+
+```bash
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --user-data-dir="/tmp/chrome-dev-test" \
+  --unsafely-treat-insecure-origin-as-secure=http://127.0.0.1:8000 \
+  --disable-web-security
+```
+
+**Linux:**
+
+```bash
+google-chrome \
+  --user-data-dir="/tmp/chrome-dev-test" \
+  --unsafely-treat-insecure-origin-as-secure=http://127.0.0.1:8000 \
+  --disable-web-security
+```
+
+### Security notes
+
+* These flags **removes important browser protections**. Use them **only** for local testing of your app.
+* Always use a **separate** `--user-data-dir` so your main Chrome profile stays safe.
+* Close all Chrome windows before running the command, and avoid visiting untrusted sites in that session.
 
 ## Screenshots
 
