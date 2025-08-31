@@ -5,7 +5,7 @@ A custom Filament form component to capture photos from your device camera.
 ## Features
 
 - Take photos directly from the user's device camera
-- Seamless integration with Filament 4 forms
+- Seamless integration with Filament forms
 - Configurable storage options (disk, directory, visibility)
 - Camera selector for devices with multiple cameras
 - Adjustable aspect ratio and image quality
