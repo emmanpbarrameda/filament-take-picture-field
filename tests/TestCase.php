@@ -2,20 +2,11 @@
 
 namespace emmanpbarrameda\FilamentTakePictureField\Tests;
 
-use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
-use BladeUI\Icons\BladeIconsServiceProvider;
-use Filament\Actions\ActionsServiceProvider;
-use Filament\FilamentServiceProvider;
-use Filament\Forms\FormsServiceProvider;
-use Filament\Infolists\InfolistsServiceProvider;
-use Filament\Notifications\NotificationsServiceProvider;
-use Filament\Support\SupportServiceProvider;
-use Filament\Tables\TablesServiceProvider;
-use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Livewire\LivewireServiceProvider;
+use Filament\Support\SupportServiceProvider;
+use Filament\Forms\FormsServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
-use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
 use emmanpbarrameda\FilamentTakePictureField\FilamentTakePictureFieldServiceProvider;
 
 class TestCase extends Orchestra
@@ -25,36 +16,24 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'emmanpbarrameda\\FilamentTakePictureField\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
+            fn (string $modelName) =>
+                'emmanpbarrameda\\FilamentTakePictureField\\Database\\Factories\\'
+                . class_basename($modelName) . 'Factory'
         );
     }
 
-    protected function getPackageProviders($app)
+    protected function getPackageProviders($app): array
     {
         return [
-            ActionsServiceProvider::class,
-            BladeCaptureDirectiveServiceProvider::class,
-            BladeHeroiconsServiceProvider::class,
-            BladeIconsServiceProvider::class,
-            FilamentServiceProvider::class,
-            FormsServiceProvider::class,
-            InfolistsServiceProvider::class,
             LivewireServiceProvider::class,
-            NotificationsServiceProvider::class,
             SupportServiceProvider::class,
-            TablesServiceProvider::class,
-            WidgetsServiceProvider::class,
+            FormsServiceProvider::class,
             FilamentTakePictureFieldServiceProvider::class,
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    protected function getEnvironmentSetUp($app): void
     {
         config()->set('database.default', 'testing');
-
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_filament-take-picture-field_table.php.stub';
-        $migration->up();
-        */
     }
 }
