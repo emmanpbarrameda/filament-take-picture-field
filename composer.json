@@ -1,61 +1,62 @@
 {
-    "name": "emmanpbarrameda/filament-take-picture-field",
-    "description": "FilamentTakePictureField Component for Filament Forms",
-    "keywords": [
-        "emmanpbarrameda",
-        "laravel",
-        "filament",
-        "form-component",
-        "filament-take-picture-field",
-        "take-picture"
-    ],
-    "homepage": "https://github.com/emmanpbarrameda/filament-take-picture-field",
-    "support": {
-        "issues": "https://github.com/emmanpbarrameda/filament-take-picture-field/issues",
-        "source": "https://github.com/emmanpbarrameda/filament-take-picture-field"
-    },
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "emmanpbarrameda",
-            "email": "emmanuelbarrameda1@gmail.com",
-            "role": "Developer"
-        }
-    ],
-    "require": {
-        "php": "^8.2",
-        "filament/forms": "^4.0",
-        "spatie/laravel-package-tools": "^1.15.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "emmanpbarrameda\\FilamentTakePictureField\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "emmanpbarrameda\\FilamentTakePictureField\\Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "emmanpbarrameda\\FilamentTakePictureField\\FilamentTakePictureFieldServiceProvider"
-            ]
-        }
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+  "name": "emmanpbarrameda/filament-take-picture-field",
+  "description": "FilamentTakePictureField Component for Filament Forms",
+  "type": "library",
+  "license": "MIT",
+  "keywords": ["filament","forms","take-picture"],
+  "homepage": "https://github.com/emmanpbarrameda/filament-take-picture-field",
+  "support": {
+    "issues": "https://github.com/emmanpbarrameda/filament-take-picture-field/issues",
+    "source": "https://github.com/emmanpbarrameda/filament-take-picture-field"
+  },
+  "authors": [
+    {"name": "emmanpbarrameda", "email": "emmanuelbarrameda1@gmail.com", "role": "Developer"}
+  ],
+
+  "require": {
+    "php": "^8.1",
+    "filament/forms": "^3.3 || ^4.0",
+    "spatie/laravel-package-tools": "^1.15"
+  },
+
+  "require-dev": {
+    "orchestra/testbench": "^8.0 || ^9.0 || ^10.0",
+    "pestphp/pest": "^2.0 || ^3.0",
+    "pestphp/pest-plugin-laravel": "^2.0 || ^3.0"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "emmanpbarrameda\\FilamentTakePictureField\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "emmanpbarrameda\\FilamentTakePictureField\\Tests\\": "tests/"
+    }
+  },
+
+  "scripts": {
+    "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+    "test": "vendor/bin/pest",
+    "test-coverage": "vendor/bin/pest --coverage"
+  },
+
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true,
+      "phpstan/extension-installer": true
+    }
+  },
+
+  "extra": {
+    "laravel": {
+      "providers": [
+        "emmanpbarrameda\\FilamentTakePictureField\\FilamentTakePictureFieldServiceProvider"
+      ]
+    }
+  },
+
+  "prefer-stable": true
 }
