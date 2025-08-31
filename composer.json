@@ -27,6 +27,10 @@
         "filament/forms": "^4.0",
         "spatie/laravel-package-tools": "^1.15.0"
     },
+    "require-dev": {
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0"
+    },
     "autoload": {
         "psr-4": {
             "emmanpbarrameda\\FilamentTakePictureField\\": "src/"
