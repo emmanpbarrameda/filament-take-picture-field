@@ -1,6 +1,7 @@
 # Filament Take Picture Field v1
+### A custom Filament form component to capture photos from your device camera.
 
-A custom Filament form component to capture photos from your device camera.
+![emmanpbarrameda-take-picture-field](https://github.com/user-attachments/assets/72f92507-91d7-49c2-84f8-a4fbc3127caf)
 
 ## Features
 
