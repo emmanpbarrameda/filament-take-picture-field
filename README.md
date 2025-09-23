@@ -15,7 +15,7 @@
 ## Installation
 
 ```bash
-composer require emmanpbarrameda/filament-take-picture-field
+composer require emmanpbarrameda/filament-take-picture-field:^1.1 -W
 ```
 
 ## Requirements
