@@ -4,8 +4,8 @@ namespace emmanpbarrameda\FilamentTakePictureField\Forms\Components;
 
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\Concerns\HasFileAttachments;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
