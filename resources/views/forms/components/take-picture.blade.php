@@ -18,7 +18,7 @@
             modalOpen: false,
             aspectRatio: '{{ $getAspect() }}',
             imageQuality: {{ $getImageQuality() }},
-            mirroredView: '{{ $getMirroredView() ? 'true' : 'false' }}',
+            mirroredView: {{ $getMirroredView() ? 'true' : 'false' }},
             isDisabled: {{ json_encode($isDisabled) }},
             urlPrefix: '{{ $getImageUrlPrefix() }}',
             isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
