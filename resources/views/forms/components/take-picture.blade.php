@@ -488,7 +488,7 @@
                                     <button
                                         type="button"
                                         @click="capturePhoto()"
-                                        class="w-16 h-16 rounded-full bg-primary-600 hover:bg-primary-700 border-4 border-white flex items-center justify-center shadow-lg"
+                                        class="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center shadow-lg"
                                         title="{{ __('Take Photo') }}"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -562,7 +562,7 @@
                             <button
                                 type="button"
                                 @click="closeModal()"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600"
+                                class="px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600"
                             >
                                 {{ __('Cancel') }}
                             </button>
@@ -571,7 +571,7 @@
                             <button
                                 type="button"
                                 @click="capturePhoto()"
-                                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                class="px-4 py-2 text-sm font-medium border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                             >
                                 {{ __('Take Photo') }}
                             </button>
