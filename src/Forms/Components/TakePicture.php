@@ -33,6 +33,9 @@ class TakePicture extends Field {
     protected bool $shouldDeleteTemporaryFile = true;
     protected bool $showCameraSelector = false;
     protected int $imageQuality = 90;
+
+    protected bool $mirroredView = true;
+
     protected string $aspect = '16:9';
     protected bool $useModal = true;
     protected bool $shouldDeleteOnEdit = true;
@@ -106,6 +109,18 @@ class TakePicture extends Field {
         $this->useModal = $useModal;
 
         return $this;
+    }
+
+    public function mirroredView(bool $mirrored = true): static
+    {
+        $this->mirroredView = $mirrored;
+
+        return $this;
+    }
+
+    public function getMirroredView(): bool
+    {
+        return $this->mirroredView;
     }
 
     public function getDisk(): string
