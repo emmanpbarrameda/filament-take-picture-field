@@ -1,4 +1,4 @@
-# Filament Take Picture Field v1.2
+# Filament Take Picture Field v1.2.1
 ### A custom Filament form component to capture photos from your device camera.
 
 ![emmanpbarrameda-take-picture-field](https://github.com/user-attachments/assets/72f92507-91d7-49c2-84f8-a4fbc3127caf)
@@ -15,7 +15,7 @@
 ## Installation
 
 ```bash
-composer require emmanpbarrameda/filament-take-picture-field:^1.2
+composer require emmanpbarrameda/filament-take-picture-field:^1.2.1
 ```
 
 ## Requirements
