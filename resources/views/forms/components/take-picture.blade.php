@@ -2,12 +2,8 @@
     $isDisabled = $field->isDisabled();
 @endphp
 
-<x-dynamic-component
-    :component="$getFieldWrapperView()"
-    :field="$field"
->
-    <div
-        x-data="{
+<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
+    <div x-data="{
             photoData: $wire.entangle('{{ $getStatePath() }}'),
             photoSelected: false,
             webcamActive: false,
@@ -16,35 +12,39 @@
             availableCameras: [],
             selectedCameraId: null,
             modalOpen: false,
+            showingPreview: false,
             aspectRatio: '{{ $getAspect() }}',
             imageQuality: {{ $getImageQuality() }},
-            mirroredView: true,
+            maxWidth: {{ $getMaxWidth() ?? 'null' }},
+            maxHeight: {{ $getCaptureMaxWidth() ?? 'null' }},
+            autoStart: {{ $getCaptureMaxHeight() ? 'true' : 'false' }},
+            mirroredView: false,
+            isBackCamera: false,
             isDisabled: {{ json_encode($isDisabled) }},
-            urlPrefix: '{{ $getImageUrlPrefix() }}',
             isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
             currentFacingMode: 'environment',
-            
+            componentId: '{{ $getId() }}',
+            initialized: false,
+            isHovering: false,
+
             getImageUrl(path) {
                 if (!path) return null;
                 if (path.startsWith('data:image/')) return path;
-
-                //prepend the URL prefix if it's a path
-                if (!path.startsWith('http://') && !path.startsWith('https://')) {
-                    return this.urlPrefix + path;
-                }
-                return path;
+                if (path.startsWith('http://') || path.startsWith('https://')) return path;
+                const cleanPath = path.replace(/^\/+/, '');
+                return '/storage/' + cleanPath;
             },
 
             async getCameras() {
                 try {
                     const devices = await navigator.mediaDevices.enumerateDevices();
                     this.availableCameras = devices.filter(device => device.kind === 'videoinput');
-                    
+
                     if (this.availableCameras.length > 0 && !this.selectedCameraId) {
-                        //default cam
                         this.selectedCameraId = this.availableCameras[0].deviceId;
+                        this.detectCameraType(this.availableCameras[0]);
                     }
-                    
+
                     return this.availableCameras;
                 } catch (error) {
                     console.error('Error getting camera devices:', error);
@@ -52,16 +52,29 @@
                     return [];
                 }
             },
-            
-            async initWebcam() {
+
+            detectCameraType(camera) {
+                if (!camera) return;
+
+                const label = (camera.label || '').toLowerCase();
+
+                this.isBackCamera = label.includes('back') ||
+                                    label.includes('rear') ||
+                                    label.includes('environment') ||
+                                    label.includes('0, facing back');
+
+                this.mirroredView = !this.isBackCamera;
+            },
+
+            async startCamera() {
                 if (this.isDisabled) return;
                 this.webcamActive = true;
                 this.webcamError = null;
-                
-                //aspect ratio
+
+                await this.$nextTick();
                 let aspectWidth = 16;
                 let aspectHeight = 9;
-                
+
                 if (this.aspectRatio) {
                     const parts = this.aspectRatio.split(':');
                     if (parts.length === 2) {
@@ -69,7 +82,7 @@
                         aspectHeight = parseInt(parts[1]);
                     }
                 }
-                
+
                 const constraints = {
                     video: {
                         facingMode: this.isMobile ? this.currentFacingMode : 'user',
@@ -78,21 +91,35 @@
                     },
                     audio: false
                 };
-                
-                //camera is selected, use deviceId
+
                 if (this.selectedCameraId) {
                     constraints.video.deviceId = { exact: this.selectedCameraId };
                 }
-                
+
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia(constraints);
                     this.cameraStream = stream;
-                    this.$refs.video.srcObject = stream;
-                    
+
+                    await this.$nextTick();
+                    if (this.$refs.video) {
+                        this.$refs.video.srcObject = stream;
+                    } else {
+                        console.error('Video element not found');
+                    }
+
                     if ({{ $getShowCameraSelector() ? 'true' : 'false' }}) {
                         await this.getCameras();
                     }
-                    
+
+                    const videoTrack = stream.getVideoTracks()[0];
+                    if (videoTrack) {
+                        const settings = videoTrack.getSettings();
+                        if (settings.facingMode) {
+                            this.isBackCamera = settings.facingMode === 'environment';
+                            this.mirroredView = !this.isBackCamera;
+                        }
+                    }
+
                     if ({{ $getUseModal() ? 'true' : 'false' }} && !this.modalOpen) {
                         this.openModal();
                     }
@@ -101,10 +128,8 @@
                     this.handleWebcamError(error);
                 }
             },
-            
-            handleWebcamError(error) {
 
-                //mobile error
+            handleWebcamError(error) {
                 if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
                     if (window.location.protocol !== 'https:') {
                         this.webcamError = '{{ __('Camera access requires HTTPS on mobile devices') }}';
@@ -115,74 +140,105 @@
                 switch (error.name) {
                     case 'NotAllowedError':
                     case 'PermissionDeniedError':
-                        this.webcamError = '{{ __('Permission denied. Please allow camera access') }}';
+                        this.webcamError = '{{ __("filament-take-picture-field::take-picture-field.error_permission_denied") }}';
                         break;
+
                     case 'NotFoundError':
                     case 'DevicesNotFoundError':
-                        this.webcamError = '{{ __('No available or connected camera found') }}';
+                        this.webcamError = '{{ __("filament-take-picture-field::take-picture-field.error_no_camera_found") }}';
                         break;
+
                     case 'NotReadableError':
                     case 'TrackStartError':
-                        this.webcamError = '{{ __('The camera is in use by another application or cannot be accessed') }}';
+                        this.webcamError = '{{ __("filament-take-picture-field::take-picture-field.error_camera_in_use") }}';
                         break;
+
                     case 'OverconstrainedError':
-                        this.webcamError = '{{ __('Could not meet the requested camera constraints') }}';
+                        this.webcamError = '{{ __("filament-take-picture-field::take-picture-field.error_overconstrained") }}';
                         break;
+
                     case 'SecurityError':
-                        this.webcamError = '{{ __('Access blocked for security reasons. Use HTTPS or a trusted browser') }}';
+                        this.webcamError = '{{ __("filament-take-picture-field::take-picture-field.error_security") }}';
                         break;
+
                     case 'AbortError':
-                        this.webcamError = '{{ __('The camera access operation was canceled') }}';
+                        this.webcamError = '{{ __("filament-take-picture-field::take-picture-field.error_abort") }}';
                         break;
+
                     default:
-                        this.webcamError = '{{ __('An unknown error occurred while trying to open the camera') }}';
+                        this.webcamError = '{{ __("filament-take-picture-field::take-picture-field.error_unknown") }}';
                 }
             },
-            
+
             async changeCamera(cameraId) {
                 this.selectedCameraId = cameraId;
+
+                const camera = this.availableCameras.find(c => c.deviceId === cameraId);
+                this.detectCameraType(camera);
+
                 if (this.webcamActive) {
                     this.stopCamera();
                     await this.$nextTick();
-                    this.initWebcam();
+                    this.startCamera();
                 }
             },
-            
+
             capturePhoto() {
                 const video = this.$refs.video;
                 const canvas = document.createElement('canvas');
-                
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+
+                let targetWidth = video.videoWidth;
+                let targetHeight = video.videoHeight;
+
+                if (this.maxWidth || this.maxHeight) {
+                    const aspectRatio = video.videoWidth / video.videoHeight;
+
+                    if (this.maxWidth && this.maxHeight) {
+                        if (targetWidth > this.maxWidth) {
+                            targetWidth = this.maxWidth;
+                            targetHeight = Math.round(targetWidth / aspectRatio);
+                        }
+                        if (targetHeight > this.maxHeight) {
+                            targetHeight = this.maxHeight;
+                            targetWidth = Math.round(targetHeight * aspectRatio);
+                        }
+                    } else if (this.maxWidth && targetWidth > this.maxWidth) {
+                        targetWidth = this.maxWidth;
+                        targetHeight = Math.round(targetWidth / aspectRatio);
+                    } else if (this.maxHeight && targetHeight > this.maxHeight) {
+                        targetHeight = this.maxHeight;
+                        targetWidth = Math.round(targetHeight * aspectRatio);
+                    }
+                }
+
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
                 const context = canvas.getContext('2d');
-                
+
                 if (this.mirroredView) {
                     context.translate(canvas.width, 0);
                     context.scale(-1, 1);
                 }
-                
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
+
+                context.drawImage(video, 0, 0, targetWidth, targetHeight);
+
                 const quality = this.imageQuality / 100;
                 this.photoData = canvas.toDataURL('image/jpeg', quality);
-                
-                //after capture, stop the cam
+
                 this.stopCamera();
-                
-                if (this.modalOpen) {
-                    this.closeModal();
-                }
+                this.showingPreview = true;
             },
-            
-            usePhoto() {
-                this.photoSelected = true;
+
+            confirmPhoto() {
+                this.showingPreview = false;
+                this.closeModal();
             },
-            
+
             retakePhoto() {
                 this.photoSelected = false;
-                this.initWebcam();
+                this.startCamera();
             },
-            
+
             stopCamera() {
                 this.webcamActive = false;
                 if (this.cameraStream) {
@@ -190,31 +246,24 @@
                     this.cameraStream = null;
                 }
             },
-            
-            toggleCamera() {
-                if (this.webcamActive) {
-                    this.stopCamera();
-                } else {
-                    this.initWebcam();
-                }
-            },
-            
+
             toggleMirror() {
                 this.mirroredView = !this.mirroredView;
             },
 
-            flipCamera() {
-                //if multiple mobile cams, enable
+            async flipCamera() {
                 if (this.availableCameras.length < 2) return;
-                
+
                 const currentIndex = this.availableCameras.findIndex(
                     cam => cam.deviceId === this.selectedCameraId
                 );
-                
+
                 const nextIndex = (currentIndex + 1) % this.availableCameras.length;
                 const nextCamera = this.availableCameras[nextIndex];
                 this.selectedCameraId = nextCamera.deviceId;
-                
+
+                this.detectCameraType(nextCamera);
+
                 const constraints = {
                     video: {
                         deviceId: { exact: nextCamera.deviceId },
@@ -225,360 +274,344 @@
                 };
 
                 if (this.cameraStream) {
-                    this.cameraStream.getTracks().forEach(track => {
-                        track.stop();
-                    });
+                    this.cameraStream.getTracks().forEach(track => track.stop());
                     this.cameraStream = null;
                 }
 
-                navigator.mediaDevices.getUserMedia(constraints)
-                    .then(stream => {
-                        this.cameraStream = stream;
-                        if (this.$refs.video) {
-                            this.$refs.video.srcObject = stream;
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    this.cameraStream = stream;
+
+                    if (this.$refs.video) {
+                        this.$refs.video.srcObject = stream;
+                    }
+
+                    const videoTrack = stream.getVideoTracks()[0];
+                    if (videoTrack) {
+                        const settings = videoTrack.getSettings();
+                        if (settings.facingMode) {
+                            this.isBackCamera = settings.facingMode === 'environment';
+                            this.mirroredView = !this.isBackCamera;
                         }
-                        this.currentFacingMode = nextCamera.label.toLowerCase().includes('back') 
-                            ? 'environment' 
-                            : 'user';
-                    })
-                    .catch(error => {
-                        console.error('Error flipping camera:', error);
-                        this.handleWebcamError(error);
-                        this.selectedCameraId = this.availableCameras[currentIndex].deviceId;
-                    });
+                    }
+                } catch (error) {
+                    console.error('Error flipping camera:', error);
+                    this.handleWebcamError(error);
+                    this.selectedCameraId = this.availableCameras[currentIndex].deviceId;
+                    this.detectCameraType(this.availableCameras[currentIndex]);
+                }
+            },
+
+            async retakeInModal() {
+                this.showingPreview = false;
+                await this.$nextTick();
+                this.startCamera();
             },
 
             handlePreviewClick() {
                 if (!this.photoData) return;
-                
-                //preview click
-                if (this.photoData.startsWith('data:image/')) {
 
-                    //for blob
+                if (this.photoData.startsWith('data:image/')) {
                     const byteString = atob(this.photoData.split(',')[1]);
                     const mimeString = this.photoData.split(',')[0].split(':')[1].split(';')[0];
                     const ab = new ArrayBuffer(byteString.length);
                     const ia = new Uint8Array(ab);
-                    
+
                     for (let i = 0; i < byteString.length; i++) {
                         ia[i] = byteString.charCodeAt(i);
                     }
-                    
+
                     const blob = new Blob([ab], { type: mimeString });
                     const url = URL.createObjectURL(blob);
-                    
                     window.open(url, '_blank').focus();
                     return;
                 }
-                
-                //for url
+
                 window.open(this.getImageUrl(this.photoData), '_blank');
             },
-            
+
             isBase64Image() {
                 return this.photoData && this.photoData.startsWith('data:image/');
             },
-            
+
             clearPhoto() {
                 this.photoData = null;
                 this.photoSelected = false;
             },
-            
+
             openModal() {
                 this.modalOpen = true;
                 document.body.classList.add('overflow-hidden');
             },
-            
+
             closeModal() {
                 this.modalOpen = false;
+                this.showingPreview = false;
                 document.body.classList.remove('overflow-hidden');
                 this.stopCamera();
-            }
-        }"
-        x-init="() => { 
+            },
 
+            checkVisibilityAndAutoStart() {
+                if (this.initialized || this.isDisabled || this.photoData) return;
+
+                const el = this.$el;
+                if (!el) return;
+
+                const rect = el.getBoundingClientRect();
+                const isVisible = rect.width > 0 && rect.height > 0 && window.getComputedStyle(el).display !== 'none';
+
+                if (isVisible && this.autoStart) {
+                    this.initialized = true;
+                    this.$nextTick(() => {
+                        this.startCamera();
+                    });
+                }
+            }
+        }" x-init="() => {
             if (window.location.protocol !== 'https:' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
                 webcamError = '{{ __('Camera access requires HTTPS on mobile devices') }}';
             }
 
-            if (!photoData) { 
+            if (!photoData) {
                 if ({{ $getUseModal() ? 'false' : 'true' }}) {
-                    initWebcam(); 
+                    startCamera();
+                } else if (autoStart) {
+                    const observer = new MutationObserver(() => {
+                        checkVisibilityAndAutoStart();
+                    });
+
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['class', 'style']
+                    });
+
+                    checkVisibilityAndAutoStart();
+                    setTimeout(() => checkVisibilityAndAutoStart(), 100);
+                    setTimeout(() => checkVisibilityAndAutoStart(), 500);
                 }
-            } else if (!isBase64Image()) { 
-                photoSelected = true; 
+            } else if (!isBase64Image()) {
+                photoSelected = true;
             }
-            
+
             if ({{ $getShowCameraSelector() ? 'true' : 'false' }}) {
                 getCameras();
             }
-        }"
-        @keydown.escape.window="if (modalOpen) { closeModal(); } else { stopCamera(); }"
-        class="flex flex-col space-y-4"
-    >
-        <!-- preview thumbnail -->
-        <div class="flex items-center space-x-4">
-            
-            <div class="relative w-20 h-20">
+        }" @keydown.escape.window="if (modalOpen) { closeModal(); } else { stopCamera(); }" class="w-full">
 
-                <!-- photo-preview available -->
-                <template x-if="photoData">
-                    <div class="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100 shadow-sm border border-gray-300"
-                        :class="{'cursor-default': {{ json_encode($isDisabled) }}, 'cursor-pointer hover:shadow-md': !{{ json_encode($isDisabled) }}}"
-                    >
-                        <!-- get url -->
-                        <img :src="photoData ? getImageUrl(photoData) : ''" class="w-full h-full object-cover">
-                        
-                        <!-- edit Button (visible only when not disabled) -->
-                        <div class="absolute bottom-0 right-0 p-1 bg-gray-800 bg-opacity-70 rounded-tl" 
-                            x-show="!{{ json_encode($isDisabled) }}"
-                            @click.stop="initWebcam()">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
+
+        <!-- container -->
+        <div class="w-full">
+
+            <!-- Empty -->
+            <template x-if="!photoData">
+                <button type="button" @click="!isDisabled && startCamera()" :disabled="isDisabled" class="
+                        relative w-full rounded-lg border-2 border-dashed
+                        bg-white shadow-sm
+                        border-gray-300 hover:border-primary-500 hover:bg-gray-50
+                        dark:bg-white/5 dark:border-white/10 dark:hover:border-primary-400 dark:hover:bg-white/10
+                        ring-1 ring-transparent dark:ring-white/10
+                        transition-all duration-200
+                        focus:outline-none focus:ring-2 focus:ring-primary-600/30 dark:focus:ring-primary-400/30
+                    " :class="{
+                        'cursor-not-allowed opacity-50': isDisabled,
+                        'cursor-pointer': !isDisabled,
+                    }">
+                    <div class="flex flex-col items-center justify-center py-8 px-4">
+                        <div class="mb-3 rounded-full p-3 bg-gray-100 dark:bg-white/10">
+                            <x-filament::icon icon="heroicon-o-camera" class="h-6 w-6 text-gray-500 dark:text-gray-200" />
                         </div>
-                        
-                        <!-- preview button -->
-                        <div class="absolute top-0 left-0 p-1 bg-gray-800 bg-opacity-70 rounded-br">
-                            <button 
-                                type="button"
-                                @click.stop="handlePreviewClick()"
-                                class="block"
-                                x-show="photoData"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                                </svg>
+
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            {{ __('filament-take-picture-field::take-picture-field.click_to_capture') }}
+                        </p>
+
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-300">
+                            {{ __('filament-take-picture-field::take-picture-field.opens_camera_hint') }}
+                        </p>
+                    </div>
+                </button>
+            </template>
+
+
+            <!-- Photo preview -->
+            <template x-if="photoData">
+                <div class="relative w-full rounded-lg bg-white dark:bg-gray-900 ring-1 ring-gray-950/5 dark:ring-white/10 shadow-sm overflow-hidden" @mouseenter="isHovering = true" @mouseleave="isHovering = false">
+                    <div class="flex items-center gap-4 p-3">
+
+                        <!-- Thumbnail -->
+                        <div class="relative flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-gray-950/5 dark:ring-white/10">
+                            <img :src="photoData ? getImageUrl(photoData) : ''" class="w-full h-full object-cover" alt="Captured photo">
+                        </div>
+
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">
+                                {{ __('filament-take-picture-field::take-picture-field.captured_photo') }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                <span
+                                    x-text="isBase64Image() ? '{{ __('filament-take-picture-field::take-picture-field.new_capture') }}' : '{{ __('filament-take-picture-field::take-picture-field.saved_photo') }}'">
+                                </span>
+                            </p>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="flex items-center gap-1">
+
+                            <!-- Preview button -->
+                            <button type="button" @click.stop="handlePreviewClick()" class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="{{ __('View full size') }}">
+                                <x-filament::icon icon="heroicon-m-eye" class="h-5 w-5" />
+                            </button>
+                            <!-- Retake button -->
+                            <button x-show="!isDisabled" type="button" @click.stop="startCamera()" class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="{{ __('Retake photo') }}">
+                                <x-filament::icon icon="heroicon-m-camera" class="h-5 w-5" />
+                            </button>
+                            <!-- Delete button -->
+                            <button x-show="!isDisabled" type="button" @click.stop="clearPhoto()" class="flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/10 transition-colors" title="{{ __('Remove photo') }}">
+                                <x-filament::icon icon="heroicon-m-trash" class="h-5 w-5" />
                             </button>
                         </div>
 
                     </div>
-                </template>
-                
-                <!-- take photo button -->
-                <template x-if="!photoData">
-                    <button 
-                        type="button"
-                        @click="!{{ json_encode($isDisabled) }} && initWebcam()"
-                        class="w-24 h-24 rounded-lg border border-dashed border-gray-400 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors"
-                        :class="{'cursor-default pointer-events-none opacity-70': {{ json_encode($isDisabled) }}, 'cursor-pointer': !{{ json_encode($isDisabled) }}}"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span class="mt-1 text-xs text-gray-600">{{ __('Take Photo') }}</span>
-                    </button>
-                </template>
-                
-                <!-- clear button -->
-                <template x-if="photoData && !{{ json_encode($isDisabled) }}">
-                    <button 
-                        type="button" 
-                        @click.stop="clearPhoto()" 
-                        class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-sm hover:bg-red-600 transition-colors"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </template>
-                
-            </div>
-            
-            <!-- help text -->
-            @if (!$isDisabled)
-                <div class="text-sm ml-4">
-                    <p class="text-gray-700 font-medium mb-1">{{ $getLabel() }}</p>
-                    <p class="text-gray-500 text-xs">{{ __('Click to capture a new photo') }}</p>
                 </div>
-            @endif
+            </template>
+
         </div>
-        
-        <!-- display error message, when accessing the camera -->
+
+
+        <!-- Error message -->
         <template x-if="webcamError && !modalOpen">
-            <div class="text-red-500 bg-red-50 py-2 px-3 rounded text-sm">
-                <span x-text="webcamError"></span>
+            <div class="mt-2 rounded-lg bg-danger-50 dark:bg-danger-400/10 p-3 text-sm text-danger-600 dark:text-danger-400">
+                <div class="flex items-start gap-2">
+                    <x-filament::icon icon="heroicon-m-exclamation-circle" class="h-5 w-5 flex-shrink-0" />
+                    <span x-text="webcamError"></span>
+                </div>
             </div>
         </template>
 
-        <!-- field to store the captured picture -->
+
+        <!-- Get state path -->
         <input type="hidden" {{ $applyStateBindingModifiers('wire:model') }}="{{ $getStatePath() }}">
-        
-        <!-- MODAL -->
+
+
+        <!-- Modal -->
         <template x-teleport="body">
-            <div 
-                x-show="modalOpen" 
-                @click.self="closeModal()"
-                x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-150"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
-                style="display: none;"
-            >
-                <div 
-                    @click.stop
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 scale-95"
-                    x-transition:enter-end="opacity-100 scale-100"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 scale-100"
-                    x-transition:leave-end="opacity-0 scale-95"
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg overflow-hidden"
-                >
-                    <!-- MODAL HEADER -->
-                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <div x-cloak x-show="modalOpen" @click.self="closeModal()" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-gray-950/50 p-4" style="display: none;">
+                <div @click.stop x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="w-full max-w-xl rounded-xl bg-white dark:bg-gray-900 shadow-xl ring-1 ring-gray-950/5 dark:ring-white/10">
+
+                    <!-- Modal header -->
+                    <div class="flex items-center justify-between border-b border-gray-200 dark:border-white/10 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-950 dark:text-white">
                             {{ __('Take Photo') }}
                         </h3>
-                        <button 
-                            type="button" 
-                            @click="closeModal()"
-                            class="text-gray-400 hover:text-gray-500"
-                        >
-                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+                        <button type="button" @click="closeModal()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <x-filament::icon icon="heroicon-m-x-mark" class="h-5 w-5" />
                         </button>
                     </div>
-                    
-                    <!-- MODAL BODY -->
-                    <div class="p-4">
-                        <!-- CAMERA VIEW  -->
-                        <div class="relative bg-black rounded-lg overflow-hidden mb-4">
-                            <!-- PRVIEW -->
-                            <template x-if="webcamActive && !webcamError">
-                                <div class="aspect-video flex items-center justify-center">
-                                    <video 
-                                        x-ref="video" 
-                                        autoplay 
-                                        playsinline
-                                        :style="mirroredView ? 'transform: scaleX(-1);' : ''"
-                                        class="max-w-full max-h-[60vh] object-contain"
-                                    ></video>
-                                </div>
-                            </template>
-                            
-                            <!-- ERROR -->
-                            <template x-if="webcamError">
-                                <div class="aspect-video bg-gray-800 flex flex-col items-center justify-center text-center p-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <span class="text-white text-lg font-medium" x-text="webcamError"></span>
 
-                                    <button
-                                        type="button"
-                                        @click="webcamError = null; initWebcam()"
-                                        class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
-                                    >
-                                        {{ __('Try Again') }}
-                                    </button>
-                                    
-                                </div>
-                            </template>
-                            
-                            <!-- TAKE PHOTO BUTTON -->
-                            <template x-if="webcamActive && !webcamError">
-                                <div class="absolute bottom-4 left-0 right-0 flex justify-center">
-                                    <button
-                                        type="button"
-                                        @click="capturePhoto()"
-                                        class="w-16 h-16 rounded-full bg-primary-600 hover:bg-primary-700 border-4 border-white flex items-center justify-center shadow-lg"
-                                        title="{{ __('Take Photo') }}"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </template>
-                            
-                            <!-- MIRROR -->
-                            <template x-if="webcamActive && !webcamError">
-                                <div class="absolute top-4 right-4">
-                                    <button
-                                        type="button"
-                                        @click="toggleMirror()"
-                                        class="w-10 h-10 rounded-full bg-black bg-opacity-50 text-white flex items-center justify-center"
-                                        :title="mirroredView ? disableMirrorText : enableMirrorText"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </template>
+                    <!-- Modal body -->
+                    <div class="p-6">
+                        <div class="relative rounded-lg overflow-hidden bg-gray-950 mb-4">
 
-                            <!-- FLIP on MOBILE ONLY -->
-                            <template x-if="webcamActive && !webcamError && isMobile">
-                                <div class="absolute top-4 left-4">
-                                    <button
-                                        type="button"
-                                        @click="flipCamera()"
-                                        class="w-10 h-10 rounded-full bg-black bg-opacity-50 text-white flex items-center justify-center"
-                                        title="{{ __('Flip Camera') }}"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </template>
-
-
-                        </div>
-                        
-                        <!-- CAMERA SELECTOR DROPDOWN -->
-                        <template x-if="{{ $getShowCameraSelector() ? 'true' : 'false' }} && availableCameras.length > 1">
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ __('Select Camera') }}
-                                </label>
-                                <select
-                                    x-model="selectedCameraId"
-                                    @change="changeCamera($event.target.value)"
-                                    class="block w-full bg-white text-gray-700 border-gray-300 rounded-md shadow-sm
-                                        dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700
-                                        focus:border-primary-500 focus:ring-primary-500"
-                                >
-                                    <template x-for="(camera, index) in availableCameras" :key="camera.deviceId">
-                                        <option 
-                                            :value="camera.deviceId" 
-                                            class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
-                                            x-text="`Camera ${index + 1} (${camera.label || 'Unnamed Camera'})`"
-                                        ></option>
-                                    </template>
-                                </select>
+                            <!-- Video preview (camera active) -->
+                            <div x-show="webcamActive && !webcamError" class="aspect-video flex items-center justify-center">
+                                <video x-ref="video" autoplay playsinline :style="mirroredView ? 'transform: scaleX(-1);' : ''" class="max-w-full max-h-[60vh] object-contain"></video>
                             </div>
-                        </template>
-                        
-                        <!-- ACTION BUTTONS -->
-                        <div class="flex justify-end gap-2">
-                            <button
-                                type="button"
-                                @click="closeModal()"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600"
-                            >
-                                {{ __('Cancel') }}
-                            </button>
-                            
-                            <!-- TAKE PHOTO -->
-                            <button
-                                type="button"
-                                @click="capturePhoto()"
-                                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                            >
-                                {{ __('Take Photo') }}
-                            </button>
+
+                            <!-- Photo preview (after capture) -->
+                            <div x-show="showingPreview && photoData && !webcamActive" class="aspect-video flex items-center justify-center bg-gray-900">
+                                <img :src="getImageUrl(photoData)" class="max-w-full max-h-[60vh] object-contain" alt="Captured preview">
+                            </div>
+
+                            <!-- Error display -->
+                            <div x-show="webcamError" class="aspect-video bg-gray-900 flex flex-col items-center justify-center text-center p-6">
+                                <x-filament::icon icon="heroicon-o-exclamation-triangle" class="h-12 w-12 text-danger-500 mb-4" />
+                                <span class="text-white text-lg font-medium" x-text="webcamError"></span>
+
+                                <x-filament::button color="primary" size="sm" class="mt-4" @click="webcamError = null; startCamera()">
+                                    {{ __('Try Again') }}
+                                </x-filament::button>
+                            </div>
+
+                            <!-- Capture button overlay -->
+                            <div x-show="webcamActive && !webcamError && !showingPreview" class="absolute bottom-4 left-0 right-0 flex justify-center">
+                                <button type="button" @click="capturePhoto()" class="w-16 h-16 rounded-full bg-primary-600 hover:bg-primary-500 border-4 border-white flex items-center justify-center shadow-lg transition-colors" title="{{ __('Take Photo') }}">
+                                    <x-filament::icon icon="heroicon-s-camera" class="h-8 w-8 text-white" />
+                                </button>
+                            </div>
+
+                            <!-- Mirror toggle -->
+                            <div x-show="webcamActive && !webcamError && !showingPreview" class="absolute top-4 right-4">
+                                <button type="button" @click="toggleMirror()" class="w-10 h-10 rounded-full bg-gray-900/70 text-white flex items-center justify-center hover:bg-gray-900/90 transition-colors" :class="{ 'ring-2 ring-primary-500': mirroredView }" :title="mirroredView ? '{{ __('Disable mirror') }}' : '{{ __('Enable mirror') }}'">
+                                    <x-filament::icon icon="heroicon-o-arrows-right-left" class="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <!-- Flip camera -->
+                            <div x-show="webcamActive && !webcamError && isMobile && availableCameras.length > 1 && !showingPreview" class="absolute top-4 left-4">
+                                <button type="button" @click="flipCamera()" class="w-10 h-10 rounded-full bg-gray-900/70 text-white flex items-center justify-center hover:bg-gray-900/90 transition-colors" title="{{ __('Switch Camera') }}">
+                                    <x-filament::icon icon="heroicon-o-arrow-path" class="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <!-- Camera type indicator (front/back) -->
+                            <div x-show="webcamActive && !webcamError && !showingPreview" class="absolute bottom-4 left-4">
+                                <span class="px-2 py-1 rounded-full bg-gray-900/70 text-white text-xs">
+                                    <span x-text="isBackCamera ? '{{ __('Back Camera') }}' : '{{ __('Front Camera') }}'"></span>
+                                </span>
+                            </div>
                         </div>
+
+                        <!-- Camera dropdown selector (desktop only) -->
+                        <div x-show="{{ $getShowCameraSelector() ? 'true' : 'false' }} && availableCameras.length > 1 && !isMobile" class="mb-4">
+                            <label class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                                {{ __('filament-take-picture-field::take-picture-field.select_camera') }}
+                            </label>
+
+                            <select x-model="selectedCameraId" @change="changeCamera($event.target.value)" class="
+                                    block w-full rounded-lg border-none
+                                    bg-white text-gray-950
+                                    py-2 pe-10 ps-3 text-sm
+                                    shadow-sm ring-1 ring-inset ring-gray-950/10
+                                    focus:ring-2 focus:ring-inset focus:ring-primary-600/40
+                                    dark:bg-white/5 dark:text-white dark:ring-white/10
+                                    dark:focus:ring-primary-400/40">
+                                <template x-for="(camera, index) in availableCameras" :key="camera.deviceId">
+                                    <option :value="camera.deviceId" class="bg-white text-gray-950 dark:bg-gray-900 dark:text-white" x-text="`Camera ${index + 1} (${camera.label || 'Unnamed Camera'})`"></option>
+                                </template>
+                            </select>
+
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-300">
+                                {{ __('filament-take-picture-field::take-picture-field.select_camera_hint') }}
+                            </p>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="flex justify-end gap-3">
+                            <x-filament::button x-show="!showingPreview" color="gray" @click="closeModal()">
+                                {{ __('filament-take-picture-field::take-picture-field.cancel') }}
+                            </x-filament::button>
+
+                            <x-filament::button x-show="!showingPreview && webcamActive && !webcamError" color="primary" @click="capturePhoto()">
+                                {{ __('filament-take-picture-field::take-picture-field.capture') }}
+                            </x-filament::button>
+
+                            <x-filament::button x-show="showingPreview" color="gray" @click="retakeInModal()">
+                                {{ __('filament-take-picture-field::take-picture-field.retake') }}
+                            </x-filament::button>
+
+                            <x-filament::button x-show="showingPreview" color="primary" @click="confirmPhoto()">
+                                {{ __('filament-take-picture-field::take-picture-field.use_photo') }}
+                            </x-filament::button>
+                        </div>
+
                     </div>
+
                 </div>
             </div>
         </template>
+
     </div>
 </x-dynamic-component>

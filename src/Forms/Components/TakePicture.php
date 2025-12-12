@@ -3,29 +3,13 @@
 namespace emmanpbarrameda\FilamentTakePictureField\Forms\Components;
 
 use Filament\Forms\Components\Field;
-use Filament\Forms\Components\Concerns\HasFileAttachments;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-/********************************************
- * TakePicture.php
- * author: emmanpbarrameda (emmanuelbarrameda1@gmail.com)
- */
-class TakePicture extends Field {
-
-    use HasFileAttachments;
-
-    /********************************************
-     * Connected to:
-     * take-picture.blade.php
-     */
+class TakePicture extends Field
+{
     protected string $view = 'filament-take-picture-field::forms.components.take-picture';
 
-    /********************************************
-     * Important Values
-     */
     protected string $disk = 'user_photo';
     protected ?string $directory = null;
     protected string $visibility = 'public';
@@ -36,75 +20,87 @@ class TakePicture extends Field {
     protected string $aspect = '16:9';
     protected bool $useModal = true;
     protected bool $shouldDeleteOnEdit = true;
+    protected ?int $captureMaxWidth = null;
+    protected ?int $captureMaxHeight = null;
 
-    /********************************************
-     * Functions
-     */
+    protected bool $autoStart = false;
+
     public function disk(string $disk): static
     {
         $this->disk = $disk;
-
         return $this;
-    }
-
-    public function getImageUrlPrefix(): string
-    {
-        return $this->disk === 'public' ? Storage::disk($this->disk)->url('') : '';
     }
 
     public function directory(?string $directory): static
     {
         $this->directory = $directory;
-
         return $this;
     }
 
     public function visibility(string $visibility): static
     {
         $this->visibility = $visibility;
-
         return $this;
     }
 
     public function targetField(string $fieldName): static
     {
         $this->targetField = $fieldName;
-
         return $this;
     }
 
     public function shouldDeleteTemporaryFile(bool $condition = true): static
     {
         $this->shouldDeleteTemporaryFile = $condition;
-
         return $this;
     }
 
     public function showCameraSelector(bool $show = true): static
     {
         $this->showCameraSelector = $show;
-
         return $this;
     }
 
     public function imageQuality(int $quality): static
     {
         $this->imageQuality = max(1, min(100, $quality));
-
         return $this;
     }
 
     public function aspect(string $ratio): static
     {
         $this->aspect = $ratio;
-
         return $this;
     }
 
     public function useModal(bool $useModal = true): static
     {
         $this->useModal = $useModal;
+        return $this;
+    }
 
+    public function captureMaxWidth(?int $width): static
+    {
+        $this->captureMaxWidth = $width;
+        return $this;
+    }
+
+    public function captureMaxHeight(?int $height): static
+    {
+        $this->captureMaxHeight = $height;
+        return $this;
+    }
+
+    public function captureMaxDimensions(?int $width, ?int $height): static
+    {
+        $this->captureMaxWidth = $width;
+        $this->captureMaxHeight = $height;
+        return $this;
+    }
+
+    public function autoStart(bool $autoStart = true): static
+    {
+        $this->autoStart = $autoStart;
         return $this;
     }
 
@@ -153,10 +149,24 @@ class TakePicture extends Field {
         return $this->useModal;
     }
 
+    public function getCaptureMaxWidth(): ?int
+    {
+        return $this->captureMaxWidth;
+    }
+
+    public function getCaptureMaxHeight(): ?int
+    {
+        return $this->captureMaxHeight;
+    }
+
+    public function getAutoStart(): bool
+    {
+        return $this->autoStart;
+    }
+
     public function shouldDeleteOnEdit(bool $condition = true): static
     {
         $this->shouldDeleteOnEdit = $condition;
-
         return $this;
     }
 
@@ -170,13 +180,10 @@ class TakePicture extends Field {
         if (empty($base64Data)) {
             return null;
         }
+
         $base64Data = preg_replace('#^data:image/\w+;base64,#i', '', $base64Data);
-
-        //unique filename
-        $filename = Str::uuid() . '.png';
+        $filename = Str::uuid() . '.jpg';
         $path = $this->directory ? $this->directory . '/' . $filename : $filename;
-
-        //store image
         $imageData = base64_decode($base64Data);
 
         if (!$imageData) {
@@ -191,29 +198,24 @@ class TakePicture extends Field {
     {
         parent::setUp();
 
-        $this->afterStateHydrated(function (Get $get, Set $set, ?string $state): void {
-            //displaying an existing record
+        $this->afterStateHydrated(function ($get, $set, ?string $state): void {
+            // displaying existing record
         });
 
-        $this->dehydrateStateUsing(function (?string $state, Get $get, Set $set): mixed {
-            //no base64 data, return the original state or null
+        $this->dehydrateStateUsing(function (?string $state, $get, $set): mixed {
             if (!$state || !Str::startsWith($state, 'data:image/')) {
                 return $state;
             }
-
-            //process the base64 image
             $path = $this->saveBase64Image($state);
 
             if ($this->targetField && $this->targetField !== $this->getName()) {
                 $set($this->targetField, $path);
                 return null;
             }
-
             return $path;
         });
 
-        //clean temp files
-        $this->afterStateUpdated(function (Get $get, ?string $old, ?string $state) {
+        $this->afterStateUpdated(function ($get, ?string $old, ?string $state) {
             if (
                 $this->shouldDeleteTemporaryFile && $this->shouldDeleteOnEdit &&
                 $old && $old !== $state && Storage::disk($this->disk)->exists($old)
@@ -221,6 +223,6 @@ class TakePicture extends Field {
                 Storage::disk($this->disk)->delete($old);
             }
         });
-
     }
+
 }
