@@ -11,6 +11,9 @@ use emmanpbarrameda\FilamentTakePictureField\FilamentTakePictureFieldServiceProv
 
 class TestCase extends Orchestra
 {
+
+    protected static $latestResponse = null;
+
     protected function setUp(): void
     {
         parent::setUp();
