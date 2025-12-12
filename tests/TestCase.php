@@ -12,6 +12,7 @@ use emmanpbarrameda\FilamentTakePictureField\FilamentTakePictureFieldServiceProv
 class TestCase extends Orchestra
 {
 
+    /** @var mixed */
     protected static $latestResponse = null;
 
     protected function setUp(): void
@@ -28,7 +29,6 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
-            LivewireServiceProvider::class,
             SupportServiceProvider::class,
             FormsServiceProvider::class,
             FilamentTakePictureFieldServiceProvider::class,
