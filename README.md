@@ -59,9 +59,26 @@ TakePicture::make('camera_test')
 | `imageQuality(int $quality)` | Set the JPEG quality of the captured image (0-100) |
 | `shouldDeleteOnEdit(bool $shouldDelete)` | Whether to delete the previous file when editing (default: 'false') |
 
+## Language / Translations (EN / DE / TL)
+
+This package supports multiple languages out of the box:
+
+- **English** (`en`)
+- **German** (`de`)
+- **Tagalog / Filipino** (`tl`)
+
+It follows your Laravel app locale automatically (e.g. `config('app.locale')`).
+
+### Publish translations (optional)
+If you want to customize the wording, publish the translation files:
+
+```bash
+php artisan vendor:publish --tag=filament-take-picture-field-translations
+```
+
 ## ❗ IMPORTANT NOTICE: For Local development testing
 
-The browser's Camera API only works on **secure origins** (HTTPS). Many browsers treat `https://localhost` as secure, but **plain** `http://` over an IP (e.g., `http://127.0.0.1:8000`) is considered insecure and the camera will be blocked. If it isn't working for you on `localhost`, switch to HTTPS or use the temporary Chrome test flags below.
+The browser's Camera API only works on **secure origins** (HTTPS). Many browsers treat `https://localhost` as secure, but **plain** `http://` over an IP (e.g., `http://127.0.0.1:8000`) is considered insecure and the camera will be blocked. If it isn't working for you on `localhost`, switch to HTTPS or <b>use the temporary Chrome test flags</b> below.
 
 ### Recommended (safer) options
 
