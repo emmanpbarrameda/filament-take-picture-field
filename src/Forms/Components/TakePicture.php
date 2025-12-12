@@ -3,6 +3,12 @@
 namespace emmanpbarrameda\FilamentTakePictureField\Forms\Components;
 
 use Filament\Forms\Components\Field;
+<<<<<<< HEAD
+=======
+use Filament\Forms\Components\Concerns\HasFileAttachments;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+>>>>>>> origin/main
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -224,5 +230,8 @@ class TakePicture extends Field
             }
         });
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 }
