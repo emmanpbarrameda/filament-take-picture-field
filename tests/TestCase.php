@@ -3,15 +3,10 @@
 namespace emmanpbarrameda\FilamentTakePictureField\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Livewire\LivewireServiceProvider;
-use Filament\Support\SupportServiceProvider;
-use Filament\Forms\FormsServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
-use emmanpbarrameda\FilamentTakePictureField\FilamentTakePictureFieldServiceProvider;
 
-class TestCase extends Orchestra
+abstract class TestCase extends Orchestra
 {
-
     /** @var mixed */
     protected static $latestResponse = null;
 
@@ -29,9 +24,10 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
-            SupportServiceProvider::class,
-            FormsServiceProvider::class,
-            FilamentTakePictureFieldServiceProvider::class,
+            \Livewire\LivewireServiceProvider::class,
+            \Filament\Support\SupportServiceProvider::class,
+            \Filament\Forms\FormsServiceProvider::class,
+            \emmanpbarrameda\FilamentTakePictureField\FilamentTakePictureFieldServiceProvider::class,
         ];
     }
 
