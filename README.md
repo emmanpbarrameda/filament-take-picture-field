@@ -1,4 +1,4 @@
-# Filament Take Picture Field v1
+# Filament Take Picture Field v1.3
 ### A custom Filament form component to capture photos from your device camera.
 
 ![emmanpbarrameda-take-picture-field](https://github.com/user-attachments/assets/72f92507-91d7-49c2-84f8-a4fbc3127caf)
@@ -15,7 +15,7 @@
 ## Installation
 
 ```bash
-composer require emmanpbarrameda/filament-take-picture-field:^1.1
+composer require emmanpbarrameda/filament-take-picture-field:^1.2
 ```
 
 ## Requirements
@@ -59,7 +59,7 @@ TakePicture::make('camera_test')
 | `imageQuality(int $quality)` | Set the JPEG quality of the captured image (0-100) |
 | `shouldDeleteOnEdit(bool $shouldDelete)` | Whether to delete the previous file when editing (default: 'false') |
 
-## ❗ IMPORTANT NOTICE: For Local development
+## ❗ IMPORTANT NOTICE: For Local development testing
 
 The browser's Camera API only works on **secure origins** (HTTPS). Many browsers treat `https://localhost` as secure, but **plain** `http://` over an IP (e.g., `http://127.0.0.1:8000`) is considered insecure and the camera will be blocked. If it isn't working for you on `localhost`, switch to HTTPS or use the temporary Chrome test flags below.
 
@@ -103,13 +103,20 @@ google-chrome \
 
 ## Screenshots
 
-![image](https://github.com/user-attachments/assets/12813349-b4f0-4ef2-91b7-430104b57742)
-![image](https://github.com/user-attachments/assets/2643f1af-b8bb-4a1b-b745-337b4290d74b)
-![image](https://github.com/user-attachments/assets/e7a9c5eb-e32c-418c-80b7-d3e425f0edae)
+<p align="center">
+  <img width="1107" height="665" alt="image" src="https://github.com/user-attachments/assets/df23f7b6-7b08-4ba0-9f11-41e9993a620e" />
+  <img width="1116" height="657" alt="image" src="https://github.com/user-attachments/assets/a4e86c84-dce2-450e-ae0f-f00abe75b6d5" />
+  <img width="732" height="734" alt="image" src="https://github.com/user-attachments/assets/b4b4e1cc-3f34-4fcd-9dd9-abfd67276133" />
+  <img width="731" height="703" alt="image" src="https://github.com/user-attachments/assets/59170832-de09-4dd6-9691-1a1ee84ff1e4" />
+  <img width="1134" height="721" alt="image" src="https://github.com/user-attachments/assets/263b9698-b390-4ddc-b9e8-ac828ef2341e" />
+  <img width="1090" height="322" alt="image" src="https://github.com/user-attachments/assets/3aad82ca-7667-45d1-b18b-e55a7c140863" />
+</p>
+
+
 
 ## Contributing
 
-This is version 1.0 of the filament-take-picture-field component plugin. Contributions and pull requests for improvements are welcome!
+Contributions and pull requests for improvements are welcome!
 
 ## License
 MIT
