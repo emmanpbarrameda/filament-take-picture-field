@@ -39,7 +39,6 @@ TakePicture::make('camera_test')
     ->disk('public')
     ->directory('uploads/services/payment_receipts_proof')
     ->visibility('public')
-    ->useModal(true)
     ->showCameraSelector(true)
     ->aspect('16:9')
     ->imageQuality(80)
@@ -53,7 +52,6 @@ TakePicture::make('camera_test')
 | `disk(string $disk)` | Set the storage disk for saving photos (default: 'public') |
 | `directory(string $directory)` | Set the directory path within the disk where photos will be stored |
 | `visibility(string $visibility)` | Set the file visibility (e.g., 'public', 'private') |
-| `useModal(bool $useModal)` | Enable or disable modal view for the camera (default: 'true') |
 | `showCameraSelector(bool $showSelector)` | Enable or disable camera selection option for devices with multiple cameras (default: 'true') |
 | `aspect(string $aspect)` | Set the aspect ratio for the captured image (e.g., '16:9', '4:3', '1:1') |
 | `imageQuality(int $quality)` | Set the JPEG quality of the captured image (0-100) |
