@@ -40,6 +40,7 @@ TakePicture::make('camera_test')
     ->directory('uploads/services/payment_receipts_proof')
     ->visibility('public')
     ->showCameraSelector(true)
+    ->mirroredView(true)
     ->aspect('16:9')
     ->imageQuality(80)
     ->shouldDeleteOnEdit(false)
@@ -53,6 +54,7 @@ TakePicture::make('camera_test')
 | `directory(string $directory)` | Set the directory path within the disk where photos will be stored |
 | `visibility(string $visibility)` | Set the file visibility (e.g., 'public', 'private') |
 | `showCameraSelector(bool $showSelector)` | Enable or disable camera selection option for devices with multiple cameras (default: 'true') |
+| `mirroredView(bool $mirroredView)` | Whether the camera should be initially mirrored (default: 'false') |
 | `aspect(string $aspect)` | Set the aspect ratio for the captured image (e.g., '16:9', '4:3', '1:1') |
 | `imageQuality(int $quality)` | Set the JPEG quality of the captured image (0-100) |
 | `shouldDeleteOnEdit(bool $shouldDelete)` | Whether to delete the previous file when editing (default: 'false') |
