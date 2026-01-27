@@ -18,7 +18,7 @@
             maxWidth: {{ $getCaptureMaxWidth() ?? 'null' }},
             maxHeight: {{ $getCaptureMaxHeight() ?? 'null' }},
             autoStart: {{ $getAutoStart() ? 'true' : 'false' }},
-            mirroredView: false,
+            mirroredView: {{ $getMirroredView() ? 'true' : 'false' }},
             isBackCamera: false,
             isDisabled: {{ json_encode($isDisabled) }},
             isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent),
