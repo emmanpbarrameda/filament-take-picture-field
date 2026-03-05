@@ -13,6 +13,7 @@
             selectedCameraId: null,
             modalOpen: false,
             showingPreview: false,
+            showCaptureOverlay: {{ $getShowCaptureOverlay() ? 'true' : 'false' }},
             aspectRatio: '{{ $getAspect() }}',
             imageQuality: {{ $getImageQuality() }},
             maxWidth: {{ $getCaptureMaxWidth() ?? 'null' }},
@@ -536,7 +537,7 @@
                             </div>
 
                             <!-- Capture button overlay -->
-                            <div x-show="webcamActive && !webcamError && !showingPreview" class="absolute bottom-4 left-0 right-0 flex justify-center">
+                            <div x-show="webcamActive && !webcamError && !showingPreview && showCaptureOverlay" class="absolute bottom-4 left-0 right-0 flex justify-center">
                                 <button type="button" @click="capturePhoto()" class="w-16 h-16 rounded-full bg-primary-600 hover:bg-primary-500 border-4 border-white flex items-center justify-center shadow-lg transition-colors" title="{{ __('Take Photo') }}">
                                     <x-filament::icon icon="heroicon-s-camera" class="h-8 w-8 text-white" />
                                 </button>
