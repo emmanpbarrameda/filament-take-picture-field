@@ -22,7 +22,7 @@ composer require emmanpbarrameda/filament-take-picture-field:^1.2.1
 
 - Laravel 11^
 - PHP: 8.1^
-- Filament: v3^ and v4^
+- Filament: v3^, v4^ or v5^
 - A device with camera access (desktop or mobile)
 
 ## Usage
