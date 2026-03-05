@@ -16,6 +16,7 @@ class TakePicture extends Field
     protected ?string $targetField = null;
     protected bool $shouldDeleteTemporaryFile = true;
     protected bool $showCameraSelector = false;
+    protected bool $showCaptureOverlay = false;
     protected int $imageQuality = 90;
     protected string $aspect = '16:9';
     protected bool $useModal = true;
@@ -58,6 +59,12 @@ class TakePicture extends Field
     public function showCameraSelector(bool $show = true): static
     {
         $this->showCameraSelector = $show;
+        return $this;
+    }
+
+    public function showCaptureOverlay(bool $show = true): static
+    {
+        $this->showCaptureOverlay = $show;
         return $this;
     }
 
@@ -137,6 +144,11 @@ class TakePicture extends Field
     public function getImageQuality(): int
     {
         return $this->imageQuality;
+    }
+
+    public function getShowCaptureOverlay(): bool
+    {
+        return $this->showCaptureOverlay;
     }
 
     public function getAspect(): string
