@@ -28,6 +28,17 @@ composer require emmanpbarrameda/filament-take-picture-field:^1.3
 - Filament: v4^ and v5^
 - A device with camera access (desktop or mobile)
 
+## Filament Theme Setup
+
+If you are using a custom Filament theme, add the package Blade views to your theme CSS file so Tailwind can scan the component classes.
+
+In your Filament custom theme CSS file, add:
+
+```css
+@source '../../../../vendor/emmanpbarrameda/filament-take-picture-field/resources/views/**/*.blade.php';
+```
+
+
 ## Usage
 
 Add the component to your Filament form:
@@ -38,7 +49,7 @@ use emmanpbarrameda\FilamentTakePictureField\Forms\Components\TakePicture;
 TakePicture::make('pictures')
     ->label('Pictures')
     ->disk('public')
-    ->directory('uploads/services/payment_receipts_proof')
+    ->directory('uploads/services/pictures')
     ->visibility('public')
     ->aspect('16:9')
     ->captureMaxDimensions(1280, 720)
@@ -122,20 +133,26 @@ google-chrome \
 * Always use a **separate** `--user-data-dir` so your main Chrome profile stays safe.
 * Close all Chrome windows before running the command, and avoid visiting untrusted sites in that session.
 
-## Screenshots
-
+## Screenshots (Single Mode)
 <p align="center">
-  <img width="1107" height="665" alt="image" src="https://github.com/user-attachments/assets/df23f7b6-7b08-4ba0-9f11-41e9993a620e" />
-  <img width="1116" height="657" alt="image" src="https://github.com/user-attachments/assets/a4e86c84-dce2-450e-ae0f-f00abe75b6d5" />
-  <img width="732" height="734" alt="image" src="https://github.com/user-attachments/assets/b4b4e1cc-3f34-4fcd-9dd9-abfd67276133" />
-  <img width="731" height="703" alt="image" src="https://github.com/user-attachments/assets/59170832-de09-4dd6-9691-1a1ee84ff1e4" />
-  <img width="1134" height="721" alt="image" src="https://github.com/user-attachments/assets/263b9698-b390-4ddc-b9e8-ac828ef2341e" />
-  <img width="1090" height="322" alt="image" src="https://github.com/user-attachments/assets/3aad82ca-7667-45d1-b18b-e55a7c140863" />
+  <img width="1204" height="429" alt="image" src="https://github.com/user-attachments/assets/4020cccd-0914-45ce-be64-1db50bdcdcf7" />
+  <img width="595" height="556" alt="image" src="https://github.com/user-attachments/assets/ec948c3e-1048-46f3-af22-fb5f1c7d434e" />
+  <img width="583" height="460" alt="image" src="https://github.com/user-attachments/assets/85eab3cf-5edf-42cd-bb56-39d430417436" />
+  <img width="1188" height="329" alt="image" src="https://github.com/user-attachments/assets/35f95c54-4cf6-4518-9e15-592eff044a28" />
 </p>
+
+## Screenshots (Multiple Mode)
+<p align="center">
+    <img width="1199" height="430" alt="image" src="https://github.com/user-attachments/assets/8b77a78b-89dc-49ba-a035-b4d0e9d141a6" />
+    <img width="584" height="587" alt="image" src="https://github.com/user-attachments/assets/9df9b20d-85f9-4a5a-aa55-dd13159d2d54" />
+    <img width="579" height="298" alt="image" src="https://github.com/user-attachments/assets/1f78f779-b233-4079-b64a-6525c2cf65af" />
+    <img width="1203" height="486" alt="image" src="https://github.com/user-attachments/assets/9423fd58-2311-425e-b571-1cf13e1e1bf6" />
+</p>
+
 
 ## Contributing
 
-This is version 1.0 of the filament-take-picture-field component plugin. Contributions and pull requests for improvements are welcome!
+Contributions and pull requests for improvements are welcome!
 
 ## License
 MIT
