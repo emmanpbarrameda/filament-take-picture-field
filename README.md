@@ -1,28 +1,31 @@
-# Filament Take Picture Field v1.2.1
+# Filament Take Picture Field v1.3
 ### A custom Filament form component to capture photos from your device camera.
 
 ![emmanpbarrameda-take-picture-field](https://github.com/user-attachments/assets/72f92507-91d7-49c2-84f8-a4fbc3127caf)
 
 ## Features
 
-- Take photos directly from the user's device camera
+- Capture photos directly from the user's device camera
 - Seamless integration with Filament forms
-- Configurable storage options (disk, directory, visibility)
-- Camera selector for devices with multiple cameras
-- Adjustable aspect ratio and image quality
-- Modal support for better user experience
+- Configurable storage options: disk, directory, and visibility
+- Camera selector support for devices with multiple cameras
+- Adjustable aspect ratio, image quality, and maximum capture dimensions
+- Multiple-shot mode with custom shot keys and labels
+- Option to require all configured shots before saving
+- Text-to-speech instructions for multiple-shot capture
+- Support for previewing, retaking, and removing captured photos
 
 ## Installation
 
 ```bash
-composer require emmanpbarrameda/filament-take-picture-field:^1.2.1
+composer require emmanpbarrameda/filament-take-picture-field:^1.3
 ```
 
 ## Requirements
 
 - Laravel 11^
 - PHP: 8.1^
-- Filament: v3^ and v4^
+- Filament: v4^ and v5^
 - A device with camera access (desktop or mobile)
 
 ## Usage
@@ -32,51 +35,54 @@ Add the component to your Filament form:
 ```php
 use emmanpbarrameda\FilamentTakePictureField\Forms\Components\TakePicture;
 
-// ...
-
-TakePicture::make('camera_test')
-    ->label('Camera Test')
+TakePicture::make('pictures')
+    ->label('Pictures')
     ->disk('public')
     ->directory('uploads/services/payment_receipts_proof')
     ->visibility('public')
-    ->showCameraSelector(true)
     ->aspect('16:9')
-    ->imageQuality(80)
-    ->shouldDeleteOnEdit(false)
+    ->captureMaxDimensions(1280, 720)
+    ->imageQuality(50)
+    ->showCameraSelector(true)
+
+    // Multiple shots configuration
+    ->multiple([
+        ['key' => 'main', 'label' => 'Main Picture'],
+        ['key' => 'front', 'label' => 'Front Picture'],
+        ['key' => 'left', 'label' => 'Left Side Picture'],
+        ['key' => 'right', 'label' => 'Right Side Picture'],
+        ['key' => 'back', 'label' => 'Back Picture'],
+    ])
+    ->requireAllShots(true)
+
+    // Enable TTS on multiple shots
+    ->enableTextToSpeech(true, 'en-US')
+
+    ->columnSpanFull()
+    ->required(),
+
 ```
 
 ## Configuration Options
 
 | Method | Description |
 |--------|-------------|
-| `disk(string $disk)` | Set the storage disk for saving photos (default: 'public') |
-| `directory(string $directory)` | Set the directory path within the disk where photos will be stored |
-| `visibility(string $visibility)` | Set the file visibility (e.g., 'public', 'private') |
-| `showCameraSelector(bool $showSelector)` | Enable or disable camera selection option for devices with multiple cameras (default: 'true') |
-| `aspect(string $aspect)` | Set the aspect ratio for the captured image (e.g., '16:9', '4:3', '1:1') |
-| `imageQuality(int $quality)` | Set the JPEG quality of the captured image (0-100) |
-| `shouldDeleteOnEdit(bool $shouldDelete)` | Whether to delete the previous file when editing (default: 'false') |
+| `label(string $label)` | Set the field label displayed in the Filament form. |
+| `disk(string $disk)` | Set the storage disk for saving photos. Example: `public` |
+| `directory(?string $directory)` | Set the directory path within the disk where photos will be stored. Example: `uploads/services/payment_receipts_proof` |
+| `visibility(string $visibility)` | Set the file visibility, such as `public` or `private`. |
+| `aspect(string $ratio)` | Set the capture aspect ratio, such as `16:9`, `4:3`, or `1:1`. |
+| `captureMaxDimensions(?int $width, ?int $height)` | Set the maximum captured image width and height. Example: `1280, 720` |
+| `imageQuality(int $quality)` | Set the JPEG image quality from `1` to `100`. Example: `50` |
+| `showCameraSelector(bool $show = true)` | Show or hide the camera selector for devices with multiple cameras. |
+| `multiple(array $shots = [])` | Enable multiple-shot mode and define the shot sequence. Each shot should have a `key` and `label`. |
+| `requireAllShots(bool $required = true)` | Require all configured multiple shots before saving. |
+| `enableTextToSpeech(bool $enable = true, string $lang = 'en-US')` | Enable or disable text-to-speech instructions for multiple-shot mode. Example: `true, 'en-US'` |
+| `columnSpanFull()` | Make the field span the full width of the form layout. |
 
-## Language / Translations (EN / DE / TL)
+## ❗ IMPORTANT NOTICE: For Local development
 
-This package supports multiple languages out of the box:
-
-- **English** (`en`)
-- **German** (`de`)
-- **Tagalog / Filipino** (`tl`)
-
-It follows your Laravel app locale automatically (e.g. `config('app.locale')`).
-
-### Publish translations (optional)
-If you want to customize the wording, publish the translation files:
-
-```bash
-php artisan vendor:publish --tag=filament-take-picture-field-translations
-```
-
-## ❗ IMPORTANT NOTICE: For Local development testing
-
-The browser's Camera API only works on **secure origins** (HTTPS). Many browsers treat `https://localhost` as secure, but **plain** `http://` over an IP (e.g., `http://127.0.0.1:8000`) is considered insecure and the camera will be blocked. If it isn't working for you on `localhost`, switch to HTTPS or <b>use the temporary Chrome test flags</b> below.
+The browser's Camera API only works on **secure origins** (HTTPS). Many browsers treat `https://localhost` as secure, but **plain** `http://` over an IP (e.g., `http://127.0.0.1:8000`) is considered insecure and the camera will be blocked. If it isn't working for you on `localhost`, switch to HTTPS or use the temporary Chrome test flags below.
 
 ### Recommended (safer) options
 
@@ -127,11 +133,9 @@ google-chrome \
   <img width="1090" height="322" alt="image" src="https://github.com/user-attachments/assets/3aad82ca-7667-45d1-b18b-e55a7c140863" />
 </p>
 
-
-
 ## Contributing
 
-Contributions and pull requests for improvements are welcome!
+This is version 1.0 of the filament-take-picture-field component plugin. Contributions and pull requests for improvements are welcome!
 
 ## License
 MIT
