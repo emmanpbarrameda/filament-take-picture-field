@@ -17,8 +17,8 @@
 
 ## Requirements
 
-- Laravel 11^
-- PHP: 8.1^
+- Laravel 11^, 12^, 13^
+- PHP: 8.1^, 8.2^, 8.3^
 - Filament: v4^ and v5^
 - A device with camera access (desktop or mobile)
 
