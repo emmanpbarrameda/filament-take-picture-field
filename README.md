@@ -17,9 +17,9 @@
 
 ## Requirements
 
-- Laravel 11^, 12^, 13^
-- PHP: 8.1^, 8.2^, 8.3^
-- Filament: v4^ and v5^
+- Laravel: ^10, ^11, ^12, or ^13
+- PHP: ^8.1, ^8.2, or ^8.3
+- Filament Forms: ^4.0 or ^5.0
 - A device with camera access (desktop or mobile)
 
 ## Installation
