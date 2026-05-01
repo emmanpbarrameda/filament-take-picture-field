@@ -1,4 +1,9 @@
 # Filament Take Picture Field v1.3
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/emmanpbarrameda/filament-take-picture-field.svg?style=flat-square)](https://packagist.org/packages/emmanpbarrameda/filament-take-picture-field)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/emmanpbarrameda/filament-take-picture-field/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/emmanpbarrameda/filament-take-picture-field/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/emmanpbarrameda/filament-take-picture-field.svg?style=flat-square)](https://packagist.org/packages/emmanpbarrameda/filament-take-picture-field)
+[![License](https://img.shields.io/packagist/l/emmanpbarrameda/filament-take-picture-field.svg?style=flat-square)](https://packagist.org/packages/emmanpbarrameda/filament-take-picture-field)
+
 ### A custom Filament form component to capture photos from your device camera.
 
 <img width="1204" height="429" alt="image" src="https://github.com/user-attachments/assets/4020cccd-0914-45ce-be64-1db50bdcdcf7" />
