@@ -48,3 +48,11 @@ compile({
     entryPoints: ['./resources/js/index.js'],
     outfile: './resources/dist/filament-take-picture-field.js',
 })
+
+// Alpine component for the TakePicture field, loaded on demand by Filament
+// (registered in FilamentTakePictureFieldServiceProvider).
+compile({
+    ...defaultOptions,
+    entryPoints: ['./resources/js/components/take-picture.js'],
+    outfile: './resources/dist/components/take-picture.js',
+})
