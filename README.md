@@ -6,7 +6,8 @@
 
 ### A custom Filament form component to capture photos from your device camera.
 
-<img width="1204" height="429" alt="image" src="https://github.com/user-attachments/assets/4020cccd-0914-45ce-be64-1db50bdcdcf7" />
+<img width="1250" height="727" alt="Screenshot 2026-10-19 003257" src="https://github.com/user-attachments/assets/ec5e39fb-f591-40bb-8c43-fddd8765157e" />
+
 
 ## Features
 
@@ -77,14 +78,18 @@ Run `php artisan filament:assets` after updating, and make sure your theme's `@s
 
 ## Screenshots (Single Mode)
 <p align="center">
-  <img width="1204" height="429" alt="image" src="https://github.com/user-attachments/assets/4020cccd-0914-45ce-be64-1db50bdcdcf7" />
-  <img width="595" height="556" alt="image" src="https://github.com/user-attachments/assets/ec948c3e-1048-46f3-af22-fb5f1c7d434e" />
+  <img width="100%" alt="Single mode screenshot 1" src="https://github.com/user-attachments/assets/edc45324-8d45-49de-91b0-22b7668dedd3" />
+  <img width="100%" alt="Single mode screenshot 2" src="https://github.com/user-attachments/assets/7746c51e-c72f-4680-b968-f4fda67ba869" />
+  <img width="49%" alt="Single mode screenshot 3" src="https://github.com/user-attachments/assets/3d6cf609-f170-4569-9ae4-310116edcab7" />
+  <img width="49%" alt="Single mode screenshot 4" src="https://github.com/user-attachments/assets/ca4b5eb7-2956-48d9-bf03-9f3790cb9804" />
 </p>
 
 ## Screenshots (Multiple Mode)
 <p align="center">
-    <img width="1199" height="430" alt="image" src="https://github.com/user-attachments/assets/8b77a78b-89dc-49ba-a035-b4d0e9d141a6" />
-    <img width="1203" height="486" alt="image" src="https://github.com/user-attachments/assets/9423fd58-2311-425e-b571-1cf13e1e1bf6" />
+  <img width="100%" alt="Multiple mode screenshot 1" src="https://github.com/user-attachments/assets/755072b8-7053-41c1-aeff-fb526312c549" />
+  <img width="49%" alt="Multiple mode screenshot 2" src="https://github.com/user-attachments/assets/8fe30301-8589-4df8-bcdf-07e62b69ce3e" />
+  <img width="49%" alt="Multiple mode screenshot 3" src="https://github.com/user-attachments/assets/765fcb1a-ecdf-45d0-852f-c5c9dbedd350" />
+  <img width="100%" alt="Multiple mode screenshot 4" src="https://github.com/user-attachments/assets/ba4248d5-1da3-4b43-8ab4-6f705c7ea39a" />
 </p>
 
 ## Full Documentation
