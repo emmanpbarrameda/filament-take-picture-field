@@ -1,4 +1,4 @@
-# Filament Take Picture Field v1.3
+# Filament Take Picture Field v1.4
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/emmanpbarrameda/filament-take-picture-field.svg?style=flat-square)](https://packagist.org/packages/emmanpbarrameda/filament-take-picture-field)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/emmanpbarrameda/filament-take-picture-field/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/emmanpbarrameda/filament-take-picture-field/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/emmanpbarrameda/filament-take-picture-field.svg?style=flat-square)](https://packagist.org/packages/emmanpbarrameda/filament-take-picture-field)
@@ -19,19 +19,61 @@
 - Option to require all configured shots before saving
 - Text-to-speech instructions for multiple-shot capture
 - Support for previewing, retaking, and removing captured photos
+- Camera in a modal or inline, with configurable mirroring
 
 ## Requirements
 
-- Laravel: ^10, ^11, ^12, or ^13
-- PHP: ^8.1, ^8.2, or ^8.3
-- Filament Forms: ^4.0 or ^5.0
+- Laravel: ^11.28, ^12, or ^13
+- PHP: ^8.2
+- Filament: ^4.0 or ^5.0
 - A device with camera access (desktop or mobile)
 
 ## Installation
 
 ```bash
-composer require emmanpbarrameda/filament-take-picture-field:^1.3
+composer require emmanpbarrameda/filament-take-picture-field:^1.4
 ```
+
+Then publish the plugin's assets (most apps already run this automatically through `php artisan filament:upgrade`):
+
+```bash
+php artisan filament:assets
+```
+
+### Filament theme setup
+
+The field's styles are compiled by your Filament theme, so a custom theme is required. If you don't have one yet:
+
+```bash
+php artisan make:filament-theme
+```
+
+Add the plugin's views to your theme CSS file (e.g. `resources/css/filament/admin/theme.css`):
+
+```css
+@source '../../../../vendor/emmanpbarrameda/filament-take-picture-field/resources/views/**/*.blade.php';
+```
+
+Then rebuild:
+
+```bash
+npm run build
+```
+
+## Quick start
+
+```php
+use emmanpbarrameda\FilamentTakePictureField\Forms\Components\TakePicture;
+
+TakePicture::make('photo')
+    ->disk('public')
+    ->directory('uploads/photos')
+    ->columnSpanFull();
+```
+
+## Upgrading from v1.3
+
+Run `php artisan filament:assets` after updating, and make sure your theme's `@source` line ends with `resources/views/**/*.blade.php` (the views are now split into subfolders). No code changes are needed.
 
 ## Screenshots (Single Mode)
 <p align="center">
